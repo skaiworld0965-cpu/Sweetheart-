@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Journey of Us ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0; -webkit-tap-highlight-color: transparent;}
+:root{--dark:#0a0a0f; --gold:#d4af37; --paper:#fdf6e3; --wood:#2c1e16; --lake:#050914;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);font-family:'Playfair Display',serif;color:#fff;}
+
+/* ── PAGE CONTROLLER ── */
+.page{position:fixed;inset:0;opacity:0;pointer-events:none;transition:opacity 1s ease-in-out, transform 1s ease;transform:scale(0.98);overflow:hidden;z-index:10;}
+.page.active{opacity:1;pointer-events:all;transform:scale(1);}
+
+/* ── GLOBAL UI ── */
+.flash{position:fixed;inset:0;background:#fff;z-index:9999;opacity:0;pointer-events:none;transition:opacity 0.5s;}
+.flash.active{opacity:1;}
+.nav-btn{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px 30px;border-radius:30px;font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;cursor:pointer;z-index:9000;opacity:0;pointer-events:none;transition:all 0.4s;box-shadow:0 4px 15px rgba(0,0,0,0.3);}
+.nav-btn.show{opacity:1;pointer-events:all;}
+.nav-btn:hover{background:rgba(255,255,255,0.2); transform:translateX(-50%) scale(1.05);}
+.music-btn{position:fixed;top:20px;right:20px;width:45px;height:45px;border-radius:50%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:1.2rem;display:flex;align-items:center;justify-content:center;z-index:9900;cursor:pointer;backdrop-filter:blur(5px);}
+
+/* ── PAGE 1: WAX SEAL (3D ENVELOPE) ── */
+#p1{background:radial-gradient(circle at center, #3a2a22, var(--wood)); display:flex;align-items:center;justify-content:center;}
+.env-wrapper{position:relative;width:300px;height:200px;perspective:1000px; cursor:pointer;}
+.env{position:absolute;inset:0;background:#e2d5c3;box-shadow:0 20px 50px rgba(0,0,0,0.7);border-radius:4px; transform-style:preserve-3d; transition:transform 0.6s;}
+.env-wrapper:hover .env{transform:translateY(-5px) rotateX(5deg);}
+.env-front{position:absolute;inset:0;background:linear-gradient(135deg, #f0e6d6, #dccbb3);border-radius:4px;z-index:3;clip-path:polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);box-shadow:inset 0 0 20px rgba(0,0,0,0.1);}
+.env-back{position:absolute;inset:0;background:#c8b69d;border-radius:4px;z-index:1;}
+.env-flap{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to bottom, #ebdcd0, #d5c3aa);clip-path:polygon(0 0, 100% 0, 50% 60%);z-index:4;transform-origin:top;transition:transform 1s cubic-bezier(0.4, 0, 0.2, 1); filter:drop-shadow(0 5px 5px rgba(0,0,0,0.2));}
+.env-wrapper.open .env-flap{transform:rotateX(180deg);z-index:2;}
+.wax-seal{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:50px;height:50px;background:radial-gradient(circle at 30% 30%, #a02020, #600b0b);border-radius:50%;z-index:5;box-shadow:inset 0 0 10px rgba(0,0,0,0.5), 0 4px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;transition:opacity 0.4s, transform 0.4s;}
+.wax-seal::after{content:'❤';color:rgba(255,255,255,0.6);font-size:1.2rem;text-shadow:1px 1px 2px rgba(0,0,0,0.8);}
+.env-wrapper.open .wax-seal{opacity:0; transform:translate(-50%,-50%) scale(1.5);}
+.p1-hint{position:absolute;bottom:15%;width:100%;text-align:center;font-style:italic;color:rgba(255,255,255,0.6);letter-spacing:1px;animation:pulse 2s infinite;}
+
+/* ── PAGE 2: STARS ALIGNED ── */
+#p2{background:radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);}
+#starCanvas{position:absolute;inset:0;z-index:1;}
+.constellation-text{position:absolute;top:15%;width:100%;text-align:center;z-index:5;padding:0 20px;}
+.constellation-text h2{font-size:2rem;color:var(--gold);margin-bottom:10px;text-shadow:0 0 20px rgba(212,175,55,0.5);}
+.constellation-text p{font-size:1.1rem;color:#c8c8c8;line-height:1.6;font-style:italic;}
+.star-photo{position:absolute;width:120px;height:120px;border-radius:50%;border:2px solid rgba(212,175,55,0.3);box-shadow:0 0 30px rgba(212,175,55,0.2);object-fit:cover;z-index:4;opacity:0;transform:scale(0.8);transition:all 1s ease;}
+.star-photo.reveal{opacity:1;transform:scale(1);}
+.sp1{top:45%;left:15%;} .sp2{top:65%;right:15%;} .sp3{top:35%;right:20%;}
+
+/* ── PAGE 3: TANGIBLE MEMORIES (CORKBOARD) ── */
+#p3{background:linear-gradient(to bottom, #1a1a24, #101016); overflow-y:auto; overflow-x:hidden;}
+.wire{position:absolute;top:20%;left:-10%;width:120%;height:100px;border-bottom:2px solid rgba(255,255,255,0.1);border-radius:50%;z-index:1;}
+.wire:nth-child(2){top:55%; left:-5%; width:110%; transform:rotate(2deg);}
+.p3-title{text-align:center;padding:40px 20px 20px;font-size:2.2rem;color:var(--paper);z-index:5;position:relative;text-shadow:0 4px 10px rgba(0,0,0,0.5);}
+.polaroid-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:30px 15px;padding:20px;z-index:5;position:relative;max-width:800px;margin:0 auto; padding-bottom:120px;}
+.polaroid{width:140px;background:#fff;padding:10px 10px 30px 10px;box-shadow:0 15px 35px rgba(0,0,0,0.4);border-radius:2px;transform-origin:top center;animation:sway 4s ease-in-out infinite alternate;position:relative;cursor:pointer;}
+.polaroid:nth-child(even){animation-delay:-2s;}
+.polaroid:nth-child(3n){animation-duration:5s;}
+.polaroid::before{content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:15px;height:25px;background:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.5);box-shadow:0 2px 5px rgba(0,0,0,0.5);clip-path:polygon(0 0, 100% 0, 80% 100%, 20% 100%);z-index:2;}
+.polaroid-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform 0.8s cubic-bezier(0.4,0,0.2,1);}
+.polaroid.flipped .polaroid-inner{transform:rotateY(180deg);}
+.p-front, .p-back{position:absolute;inset:0;backface-visibility:hidden;}
+.p-front{position:relative;}
+.p-front img{width:100%;aspect-ratio:1;object-fit:cover;background:#222;filter:sepia(0.2) contrast(1.1);}
+.p-back{background:var(--paper);transform:rotateY(180deg);display:flex;align-items:center;justify-content:center;padding:15px;text-align:center;font-family:'Caveat',cursive;font-size:1.1rem;color:#333;box-shadow:inset 0 0 20px rgba(0,0,0,0.05);}
+@keyframes sway{0%{transform:rotate(-3deg);}100%{transform:rotate(3deg);}}
+
+/* ── PAGE 4: THE LIVING LETTER ── */
+#p4{background:#111;display:flex;align-items:center;justify-content:center;}
+.parchment{width:90%;max-width:500px;background:linear-gradient(135deg, #fdfbf7, #f3ebd8);border-radius:4px;padding:40px 30px;box-shadow:0 20px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(139,69,19,0.1);color:#2c1e16;position:relative;}
+.parchment::after{content:'';position:absolute;inset:0;background:url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.05"/></svg>');pointer-events:none;}
+.letter-text{font-family:'Caveat',cursive;font-size:1.4rem;line-height:1.8;opacity:0;}
+
+/* ── PAGE 5: LANTERN RELEASE ── */
+#p5{background:linear-gradient(to bottom, #070b19 0%, #151b2e 60%, var(--lake) 100%); cursor:pointer;}
+.p5-hint{position:absolute;top:20%;width:100%;text-align:center;font-style:italic;color:rgba(255,255,255,0.7);pointer-events:none;z-index:2;animation:pulse 2s infinite;}
+.lake-reflection{position:absolute;bottom:0;left:0;width:100%;height:30%;background:linear-gradient(to top, rgba(0,0,0,0.8), transparent);z-index:3;pointer-events:none;}
+.lantern{position:absolute;width:30px;height:45px;background:radial-gradient(ellipse at center, #ffdda1 0%, #ff8c00 100%);border-radius:10px 10px 5px 5px;box-shadow:0 0 20px #ff8c00, inset 0 -5px 10px rgba(0,0,0,0.2);z-index:2;opacity:0;animation:floatUp 10s ease-in forwards;}
+.lantern::after{content:'';position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:12px;height:4px;background:#fff;border-radius:50%;box-shadow:0 0 10px #fff;}
+@keyframes floatUp{0%{opacity:0; transform:translateY(0) scale(0.5);} 10%{opacity:1; transform:translateY(-20px) scale(1);} 100%{opacity:0; transform:translateY(-100vh) scale(0.8) rotate(15deg);}}
+
+/* ── PAGE 6: OUR SONG (VINYL) ── */
+#p6{background:radial-gradient(circle at center, #2a1a1a, #0a0505);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.vinyl-container{position:relative;width:260px;height:260px;border-radius:50%;background:#111;box-shadow:0 15px 40px rgba(0,0,0,0.8), inset 0 0 10px rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;}
+.vinyl-container::before{content:'';position:absolute;inset:4px;border-radius:50%;background:repeating-radial-gradient(#111 0, #111 2px, #1a1a1a 3px, #111 4px);}
+.vinyl-label{position:absolute;width:90px;height:90px;border-radius:50%;background:var(--gold);box-shadow:0 0 15px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.vinyl-label img{width:100%;height:100%;object-fit:cover;opacity:0.8;}
+.vinyl-label::after{content:'';position:absolute;width:12px;height:12px;background:#111;border-radius:50%;box-shadow:inset 0 0 4px rgba(0,0,0,0.8);}
+.vinyl-container.playing{animation:spin 4s linear infinite;}
+@keyframes spin{100%{transform:rotate(360deg);}}
+.song-title{margin-top:40px;text-align:center;z-index:5;}
+.song-title h3{font-family:'Dancing Script',cursive;font-size:2.5rem;color:var(--gold);margin-bottom:10px;text-shadow:0 0 15px rgba(212,175,55,0.4);}
+.song-title p{font-size:1rem;color:#aaa;font-style:italic;}
+.floating-img{position:absolute;width:100px;height:100px;border-radius:8px;object-fit:cover;box-shadow:0 10px 20px rgba(0,0,0,0.5);opacity:0.4;transition:all 1s ease;z-index:2;}
+.playing .floating-img{opacity:0.8; animation:floatImg 6s ease-in-out infinite alternate;}
+@keyframes floatImg{0%{transform:translateY(0) scale(1);}100%{transform:translateY(-15px) scale(1.05);}}
+
+/* ── PAGE 7: FINALE ── */
+#p7{background:#000;display:flex;align-items:center;justify-content:center;}
+#fireworkCanvas{position:absolute;inset:0;z-index:1;}
+.spark-btn{position:relative;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle, #fff, #ffd700);box-shadow:0 0 50px #ffd700, 0 0 100px #ff8c00;cursor:pointer;z-index:10;animation:breathe 2s infinite alternate;}
+@keyframes breathe{0%{transform:scale(0.9);box-shadow:0 0 40px #ffd700;}100%{transform:scale(1.1);box-shadow:0 0 80px #ffd700, 0 0 120px #ff8c00;}}
+.finale-text{position:absolute;z-index:5;text-align:center;opacity:0;transition:opacity 2s ease;}
+.finale-text h1{font-family:'Dancing Script',cursive;font-size:4rem;color:#fff;text-shadow:0 0 20px #ffd700;margin-bottom:15px;}
+.finale-text p{font-size:1.3rem;color:#eee;font-style:italic;}
+
+@keyframes pulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
+</style>
+</head>
+<body>
+
+<audio id="bgm" loop preload="auto">
+  <source src="https://files.catbox.moe/ol3k2r.mp3" type="audio/mpeg">
+</audio>
+<button class="music-btn" id="mbtn">🎵</button>
+<div class="flash" id="flash"></div>
+<button class="nav-btn" id="nextBtn" onclick="nextPage()">Next Chapter →</button>
+
+<div class="page active" id="p1">
+  <div class="env-wrapper" id="envelope" onclick="openEnvelope()">
+    <div class="env">
+      <div class="env-back"></div>
+      <div class="env-front"></div>
+      <div class="env-flap">
+        <div class="wax-seal"></div>
+      </div>
+    </div>
+  </div>
+  <div class="p1-hint">Tap the seal to begin our story</div>
+</div>
+
+<div class="page" id="p2">
+  <canvas id="starCanvas"></canvas>
+  <div class="constellation-text" id="p2text" style="opacity:0; transition:opacity 2s;">
+    <h2>Written in the Stars</h2>
+    <p>Like the ancient nakshatras tracing paths across the night sky,<br>our lives were destined to cross.</p>
+  </div>
+  <img src="" class="star-photo sp1" id="sp1">
+  <img src="" class="star-photo sp2" id="sp2">
+  <img src="" class="star-photo sp3" id="sp3">
+</div>
+
+<div class="page" id="p3">
+  <div class="wire"></div>
+  <div class="wire"></div>
+  <div class="p3-title">The Moments We Captured</div>
+  <div class="polaroid-grid" id="polaroids"></div>
+</div>
+
+<div class="page" id="p4">
+  <div class="parchment">
+    <div class="letter-text" id="letterText"></div>
+  </div>
+</div>
+
+<div class="page" id="p5" onclick="createLantern(event)">
+  <div class="p5-hint">Tap anywhere to release a lantern for us</div>
+  <div class="lake-reflection"></div>
+</div>
+
+<div class="page" id="p6">
+  <img src="" class="floating-img" style="top:15%;left:15%;" id="fimg1">
+  <img src="" class="floating-img" style="bottom:25%;right:15%;" id="fimg2">
+  <img src="" class="floating-img" style="top:25%;right:10%;" id="fimg3">
+  
+  <div class="vinyl-container" id="vinyl" onclick="toggleVinyl()">
+    <div class="vinyl-label"><img src="" id="vinylImg"></div>
+  </div>
+  <div class="song-title">
+    <h3>Our Rhythm</h3>
+    <p>Tap the record to feel the heartbeat</p>
+  </div>
+</div>
+
+<div class="page" id="p7">
+  <canvas id="fireworkCanvas"></canvas>
+  <div class="spark-btn" id="sparkBtn" onclick="igniteFinale()"></div>
+  <div class="finale-text" id="finaleText">
+    <h1>I Love You</h1>
+    <p>Yesterday, today, and all the tomorrows.<br>Forever yours. 💗</p>
+  </div>
+</div>
+
+<script>
+// --- ASSETS ---
+const images = [
+  "https://i.ibb.co/mrcZ9pnN/IMG-9470.jpg", "https://i.ibb.co/nM2VTL6j/IMG-9471.jpg", 
+  "https://i.ibb.co/SXjJ3dbz/1275c2ac-3cf4-4c6c-977b-8b6c2c88dc01.jpg", "https://i.ibb.co/dsQ4vWGK/IMG-9464.jpg",
+  "https://i.ibb.co/0RXd50LZ/IMG-9463.jpg", "https://i.ibb.co/ZPXbCfM/IMG-9462.jpg",
+  "https://i.ibb.co/bM4ZV8kW/IMG-9461.jpg", "https://i.ibb.co/B2LQMSGg/IMG-9458.jpg",
+  "https://i.ibb.co/fYhyJpnc/IMG-9459.jpg", "https://i.ibb.co/rf5S7HwG/IMG-9457.jpg",
+  "https://i.ibb.co/QF6j6PHG/IMG-9278.jpg", "https://i.ibb.co/Pz3B5Lfd/IMG-9275.jpg",
+  "https://i.ibb.co/KzXMSgSf/IMG-9276.jpg", "https://i.ibb.co/mr6LhmcK/IMG-9277.jpg",
+  "https://i.ibb.co/YTb5zjJR/IMG-9272.jpg", "https://i.ibb.co/mFb7yZZT/IMG-9273.jpg",
+  "https://i.ibb.co/Rk1JSHBJ/IMG-9274.jpg", "https://i.ibb.co/8gGckn2Q/IMG-9270.jpg",
+  "https://i.ibb.co/HT4LKX0g/IMG-9268.jpg", "https://i.ibb.co/q37B4Lr3/IMG-9263.jpg",
+  "https://i.ibb.co/99rjFFgc/IMG-9466.jpg", "https://i.ibb.co/vbr0mXQ/IMG-9467.jpg",
+  "https://i.ibb.co/5x6sGF6T/IMG-9260.jpg", "https://i.ibb.co/qMqc6zbL/IMG-9261.jpg",
+  "https://i.ibb.co/pNVXqyj/IMG-9262.jpg", "https://i.ibb.co/4wKJ0Y1C/IMG-9259.jpg",
+  "https://i.ibb.co/b5Fy7YzN/IMG-9108.jpg", "https://i.ibb.co/9kzcBmSG/IMG-9107.jpg",
+  "https://i.ibb.co/1th5r3fk/IMG-9100.jpg", "https://i.ibb.co/spzB80hD/IMG-9099.jpg",
+  "https://i.ibb.co/Kxj918CX/IMG-9097.jpg", "https://i.ibb.co/mr5cCDd2/IMG-9087.png",
+  "https://i.ibb.co/gMShzQQM/IMG-9014.png", "https://i.ibb.co/TBPB4QNX/IMG-7872.jpg",
+  "https://i.ibb.co/HT65XRSb/IMG-2259.jpg", "https://i.ibb.co/hxr2qp2R/IMG-2266.jpg",
+  "https://i.ibb.co/7dzN7W4n/IMG-1840.jpg", "https://i.ibb.co/hJtb1b2k/IMG-1124.jpg",
+  "https://i.ibb.co/Zzx8Z27s/IMG-8840.jpg", "https://i.ibb.co/27wxNWZ9/IMG-8843.jpg",
+  "https://i.ibb.co/FbXdqbjZ/IMG-8587.jpg", "https://i.ibb.co/h1JkDj7c/3-FAA830-C-C295-4319-BEAA-A0-FEB5-BF62-AC.jpg",
+  "https://i.ibb.co/Fq8QcKzY/98ba4001-e267-49c5-83e9-69a4979e1ed1.jpg", "https://i.ibb.co/8DwgQ6W1/IMG-6123.jpg",
+  "https://i.ibb.co/3y0fZsN5/939b3a43-cfeb-4486-a9b0-dc0daca955eb.jpg", "https://i.ibb.co/8gbDg97N/IMG-4090.jpg",
+  "https://i.ibb.co/Cs7HWqHQ/IMG-4089.jpg", "https://i.ibb.co/Sz8vHYL/IMG-4088.jpg",
+  "https://i.ibb.co/mCxmzNYq/IMG-4087.jpg", "https://i.ibb.co/Z6WGTdB6/IMG-4085.jpg",
+  "https://i.ibb.co/rRxwtvQR/IMG-4083.jpg", "https://i.ibb.co/NQGJ9qR/IMG-4066.jpg",
+  "https://i.ibb.co/m5Tk8gmR/IMG-2256.jpg", "https://i.ibb.co/nM3y8xP8/IMG-8588.jpg"
+];
+
+function shuffle(a){ return [...a].sort(()=>Math.random()-0.5); }
+const imgPool = shuffle(images);
+let imgIndex = 0;
+function getImg(){ if(imgIndex>=imgPool.length) imgIndex=0; return imgPool[imgIndex++]; }
+
+// --- STATE ---
+let curPage = 1;
+const totalPages = 7;
+let musicOn = false;
+const bgm = document.getElementById('bgm');
+const mbtn = document.getElementById('mbtn');
+const nextBtn = document.getElementById('nextBtn');
+const flash = document.getElementById('flash');
+
+// --- MUSIC ---
+function tryPlay(){
+  bgm.play().then(()=>{ musicOn=true; mbtn.textContent='🎵'; }).catch(()=>{ musicOn=false; mbtn.textContent='🔇'; });
+}
+mbtn.addEventListener('click', ()=>{
+  if(musicOn){ bgm.pause(); musicOn=false; mbtn.textContent='🔇'; }
+  else { tryPlay(); }
+});
+
+// --- NAVIGATION ---
+function showNextBtn(delay){
+  setTimeout(()=>nextBtn.classList.add('show'), delay);
+}
+function hideNextBtn(){
+  nextBtn.classList.remove('show');
+}
+function nextPage(){
+  if(curPage >= totalPages) return;
+  hideNextBtn();
+  flash.classList.add('active');
+  
+  setTimeout(()=>{
+    document.getElementById('p'+curPage).classList.remove('active');
+    curPage++;
+    document.getElementById('p'+curPage).classList.add('active');
+    flash.classList.remove('active');
+    triggerPageAnimations(curPage);
+  }, 500);
+}
+
+// --- PAGE 1: ENVELOPE ---
+function openEnvelope(){
+  const env = document.getElementById('envelope');
+  if(env.classList.contains('open')) return;
+  env.classList.add('open');
+  tryPlay(); // Try to start music on first interaction
+  setTimeout(()=>nextPage(), 1800);
+}
+
+// --- PAGE 2: STARS ---
+const sCanvas = document.getElementById('starCanvas');
+const sCtx = sCanvas.getContext('2d');
+let stars = [];
+function initStars(){
+  sCanvas.width = window.innerWidth; sCanvas.height = window.innerHeight;
+  stars = [];
+  for(let i=0; i<150; i++){
+    stars.push({
+      x: Math.random()*sCanvas.width, y: Math.random()*sCanvas.height,
+      r: Math.random()*1.5, alpha: Math.random(),
+      speed: (Math.random()*0.02) + 0.005
+    });
+  }
+}
+function drawStars(){
+  sCtx.clearRect(0,0,sCanvas.width,sCanvas.height);
+  stars.forEach(s => {
+    s.alpha += s.speed;
+    sCtx.beginPath();
+    sCtx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    sCtx.fillStyle = `rgba(255, 255, 255, ${Math.abs(Math.sin(s.alpha))})`;
+    sCtx.fill();
+  });
+  
+  // Draw constellation lines slowly
+  if(curPage === 2){
+    sCtx.strokeStyle = 'rgba(212, 175, 55, 0.15)';
+    sCtx.lineWidth = 1;
+    sCtx.beginPath();
+    sCtx.moveTo(sCanvas.width*0.2, sCanvas.height*0.3);
+    sCtx.lineTo(sCanvas.width*0.5, sCanvas.height*0.2);
+    sCtx.lineTo(sCanvas.width*0.8, sCanvas.height*0.4);
+    sCtx.lineTo(sCanvas.width*0.6, sCanvas.height*0.7);
+    sCtx.lineTo(sCanvas.width*0.3, sCanvas.height*0.6);
+    sCtx.closePath();
+    sCtx.stroke();
+  }
+  requestAnimationFrame(drawStars);
+}
+initStars(); drawStars();
+window.addEventListener('resize', initStars);
+
+// --- PAGE 3: POLAROIDS ---
+const p3Notes = ["My favorite smile", "A perfect day", "You and me", "Unforgettable", "Pure happiness", "Love this", "My whole heart", "Best memories"];
+function buildPolaroids(){
+  const grid = document.getElementById('polaroids');
+  if(grid.children.length > 0) return;
+  for(let i=0; i<8; i++){
+    const p = document.createElement('div');
+    p.className = 'polaroid';
+    p.innerHTML = `
+      <div class="polaroid-inner">
+        <div class="p-front"><img src="${getImg()}"></div>
+        <div class="p-back">${p3Notes[i%p3Notes.length]}</div>
+      </div>
+    `;
+    p.onclick = () => p.classList.toggle('flipped');
+    grid.appendChild(p);
+  }
+}
+
+// --- PAGE 4: LIVING LETTER ---
+const letterContent = "My Love,\n\nEvery day with you feels like a beautiful dream I never want to wake up from. You are the light in my darkest days and the reason my heart beats so fast.\n\nThank you for being my peace, my joy, and my greatest adventure.\n\nI love you, deeply and completely.";
+function writeLetter(){
+  const box = document.getElementById('letterText');
+  if(box.innerHTML !== "") return;
+  box.style.opacity = 1;
+  let i = 0;
+  function typeWriter() {
+    if (i < letterContent.length) {
+      if(letterContent.charAt(i) === '\n'){
+        box.innerHTML += '<br>';
+      } else {
+        box.innerHTML += letterContent.charAt(i);
+      }
+      i++;
+      setTimeout(typeWriter, 40);
+    } else {
+      showNextBtn(1000);
+    }
+  }
+  setTimeout(typeWriter, 1000);
+}
+
+// --- PAGE 5: LANTERNS ---
+function createLantern(e){
+  const l = document.createElement('div');
+  l.className = 'lantern';
+  l.style.left = (e.clientX - 15) + 'px';
+  l.style.top = (e.clientY - 20) + 'px';
+  document.getElementById('p5').appendChild(l);
+  setTimeout(()=>l.remove(), 10000);
+}
+
+// --- PAGE 6: VINYL ---
+function setupVinyl(){
+  document.getElementById('vinylImg').src = getImg();
+  document.getElementById('fimg1').src = getImg();
+  document.getElementById('fimg2').src = getImg();
+  document.getElementById('fimg3').src = getImg();
+}
+function toggleVinyl(){
+  const v = document.getElementById('vinyl');
+  v.classList.toggle('playing');
+  if(v.classList.contains('playing')){
+    tryPlay();
+    showNextBtn(3000);
+  }
+}
+
+// --- PAGE 7: FIREWORKS FINALE ---
+const fCanvas = document.getElementById('fireworkCanvas');
+const fCtx = fCanvas.getContext('2d');
+let particles = [];
+function resizeFCanvas(){ fCanvas.width = window.innerWidth; fCanvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeFCanvas);
+resizeFCanvas();
+
+function igniteFinale(){
+  document.getElementById('sparkBtn').style.display = 'none';
+  document.getElementById('finaleText').style.opacity = '1';
+  
+  const cx = fCanvas.width/2;
+  const cy = fCanvas.height/2;
+  for(let i=0; i<200; i++){
+    particles.push({
+      x: cx, y: cy,
+      vx: (Math.random()-0.5)*20,
+      vy: (Math.random()-0.5)*20,
+      alpha: 1,
+      color: Math.random() > 0.5 ? '#ffd700' : '#ff8c00'
+    });
+  }
+  animateFireworks();
+}
+function animateFireworks(){
+  fCtx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+  fCtx.fillRect(0,0,fCanvas.width,fCanvas.height);
+  
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.2; // gravity
+    p.alpha -= 0.01;
+    fCtx.beginPath();
+    fCtx.arc(p.x, p.y, 3, 0, Math.PI*2);
+    fCtx.fillStyle = p.color;
+    fCtx.globalAlpha = Math.max(0, p.alpha);
+    fCtx.fill();
+  });
+  fCtx.globalAlpha = 1;
+  particles = particles.filter(p => p.alpha > 0);
+  if(particles.length > 0){
+    requestAnimationFrame(animateFireworks);
+  } else {
+    // Add continuous slow floating embers
+    if(Math.random()<0.1) {
+       particles.push({x: Math.random()*fCanvas.width, y: fCanvas.height+10, vx: (Math.random()-0.5)*2, vy: -Math.random()*3 - 1, alpha: 1, color: '#ffd700'});
+    }
+    requestAnimationFrame(animateFireworks);
+  }
+}
+
+// --- PAGE TRIGGERS ---
+function triggerPageAnimations(page){
+  if(page === 2){
+    document.getElementById('sp1').src = getImg();
+    document.getElementById('sp2').src = getImg();
+    document.getElementById('sp3').src = getImg();
+    setTimeout(()=>document.getElementById('p2text').style.opacity = 1, 800);
+    setTimeout(()=>document.getElementById('sp1').classList.add('reveal'), 2000);
+    setTimeout(()=>document.getElementById('sp2').classList.add('reveal'), 3500);
+    setTimeout(()=>document.getElementById('sp3').classList.add('reveal'), 5000);
+    showNextBtn(6500);
+  }
+  if(page === 3){
+    buildPolaroids();
+    showNextBtn(3000);
+  }
+  if(page === 4){
+    writeLetter();
+    // Next btn shown inside writeLetter
+  }
+  if(page === 5){
+    showNextBtn(4000);
+  }
+  if(page === 6){
+    setupVinyl();
+    // Next btn shown when vinyl is clicked
+  }
+}
+</script>
+</body>
+</html>
